@@ -1,7 +1,7 @@
 ---
-title: "preliminary_analyses"
+title: "final_analyses"
 author: "ML"
-date: "08/06/2022"
+date: "30/10/2022"
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -139,7 +139,7 @@ datatable(BRdata1, options = list(pageLength = 15, autoWidth = TRUE)) %>%
               backgroundColor = styleEqual(c("yes", "no", "unclear"), c("#009E73", "#D55E00", "#999999"))
              )
 
-write.csv(BRdata1, here("tables","BR_awards_table_v0.csv"))
+#write.csv(BRdata1, here("tables","BR_awards_table_v0.csv"))
 ```
 
 
@@ -174,9 +174,11 @@ BRdata %>%
   bar_chart(x = Award, y = Awardee_years) + 
   theme_classic() +
   ylim(0, 80) +
-  ylab("Year range of awardee data") 
+  ylab("Year range of awardee data") +
+  xlab("Best Researcher award") 
 
-ggsave(here("plots", "BR_awards_years_range_v0.png"), width = 18, height = 10, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BR_awards_years_range_v0.png"), width = 18, height = 10, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BR_awards_years_range_v0.pdf"), width = 18, height = 10, units = "cm")
 ```
 
 
@@ -242,8 +244,8 @@ BRdata3long %>%
   labs(fill = "Awardee name") +
   ylab("Count") 
 
-ggsave(here("plots", "BR_awards_gender_years_counts.png"), width = 18, height = 20, units = "cm", dpi = "retina")
-
+#ggsave(here("plots", "BR_awards_gender_years_counts.png"), width = 18, height = 20, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BR_awards_gender_years_counts.pdf"), width = 18, height = 20, units = "cm")
 
 ## plot for a all awards, as facets - not stacked, with percent values
 BRdata3long %>% 
@@ -259,8 +261,8 @@ BRdata3long %>%
   ylab("Percent") + 
   scale_y_continuous(labels = scales::percent)
 
-ggsave(here("plots", "BR_awards_gender_years_v1.png"), width = 18, height = 20, units = "cm", dpi = "retina")
-
+#ggsave(here("plots", "BR_awards_gender_years_v1.png"), width = 18, height = 20, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BR_awards_gender_years_v1.pdf"), width = 18, height = 20, units = "cm")
 
 ## plot for a all awards, as facets- not stacked, with percent values and count values
 BRdata3long %>% 
@@ -280,7 +282,8 @@ BRdata3long %>%
   ylab("Percent") + 
   scale_y_continuous(labels = scales::percent)
 
-ggsave(here("plots", "BR_awards_gender_years_v2.png"), width = 18, height = 20, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BR_awards_gender_years_v2.png"), width = 18, height = 20, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BR_awards_gender_years_v2.pdf"), width = 18, height = 20, units = "cm")
 ```
 
 
@@ -304,11 +307,22 @@ BRdata3long %>% pivot_wider(id_cols = c(Award, Years, Decade), # optional vector
 dat_BR$sdecade <- scale(dat_BR$Decade)
 
 #Fit generalised mixed model with binomial error family and with logit link function, award as a random effect (using glmer from lme4 package):
-mod_BR <- glmer(cbind(female, male) ~ sdecade + (1| Award), family = "binomial", data = dat_BR) 
+mod_BR <- glmer(cbind(female, male) ~ 1 + (1 | Award), family = "binomial", data = dat_BR) #across all decades
 summary(mod_BR)
-#calculate % difference between genders at the intercept (year 2005):
-plogis(summary(mod_BR)$coef[1])*100 # 25% fewer female names
-summary(mod_BR)$coef[2,] #signif. increasing proportion of females across decades
+#calculate % female names at the intercept
+plogis(summary(mod_BR)$coef[1,1])*100 # 31% female names
+#summary(mod_BR)$coef[1,1] #estimate of the Intercept 
+#summary(mod_BR)$coef[1,2] #SE of estimate of the Intercept 
+summary(mod_BR)$coef[1,1] - 1.96 * summary(mod_BR)$coef[1,2] #CI.l
+summary(mod_BR)$coef[1,1] + 1.96 * summary(mod_BR)$coef[1,2] #CI.u
+dim(dat_BR)[1] #sample size
+
+## Model with decade effect:
+mod_BR <- glmer(cbind(female, male) ~ sdecade + (1 | Award), family = "binomial", data = dat_BR) 
+summary(mod_BR)
+summary(mod_BR)$coef[2,] #signif. reduction of bias across decades
+#calculate % female names at the intercept (year 2005):
+plogis(summary(mod_BR)$coef[1,1])*100 # 25% female names around 2005
 ```
 
 
@@ -422,7 +436,7 @@ datatable(BPdata1, options = list(pageLength = 15, autoWidth = TRUE)) %>%
 # table(BPdata1$EDI_policies)
 # table(BPdata1$Career_stage)
 
-write.csv(BPdata1, here("tables","BP_awards_table_v0.csv"))
+#write.csv(BPdata1, here("tables","BP_awards_table_v0.csv"))
 ```
 
 
@@ -489,9 +503,11 @@ BPdata %>%
   bar_chart(x = Award, y = Awardee_years) + 
   theme_classic() +
   ylim(0, 80) +
-  ylab("Year range of awardee data") 
+  ylab("Year range of awardee data") +
+  xlab("Best Paper award") 
 
-ggsave(here("plots", "BP_awards_years_range_v0.png"), width = 18, height = 10, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BP_awards_years_range_v0.png"), width = 18, height = 10, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BP_awards_years_range_v0.pdf"), width = 18, height = 10, units = "cm")
 ```
 
 
@@ -565,7 +581,8 @@ BPdata3long %>%
   labs(fill = "Awardee name") +
   ylab("Count") 
 
-ggsave(here("plots", "BP_awards_gender_years_counts.png"), width = 18, height = 20, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BP_awards_gender_years_counts.png"), width = 18, height = 20, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BP_awards_gender_years_counts.pdf"), width = 18, height = 20, units = "cm")
 
 
 ## plot for a all awards, as facets- not stacked, with percent values
@@ -582,7 +599,8 @@ BPdata3long %>%
   scale_y_continuous(labels = scales::percent)
 
 
-ggsave(here("plots", "BP_awards_gender_years_v1.png"), width = 18, height = 20, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BP_awards_gender_years_v1.png"), width = 18, height = 20, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BP_awards_gender_years_v1.pdf"), width = 18, height = 20, units = "cm")
 
 
 ## plot for a all awards, as facets- not stacked, with percent values and count values
@@ -603,8 +621,8 @@ BPdata3long %>%
   ylab("Percent") + 
   scale_y_continuous(labels = scales::percent)
 
-ggsave(here("plots", "BP_awards_gender_years_v2.png"), width = 18, height = 20, units = "cm", dpi = "retina")
-
+#ggsave(here("plots", "BP_awards_gender_years_v2.png"), width = 18, height = 20, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BP_awards_gender_years_v2.pdf"), width = 18, height = 20, units = "cm")
 ```
 
 
@@ -628,12 +646,18 @@ BPdata3long %>% pivot_wider(id_cols = c(Award, Years, Decade), # optional vector
 dat_BP$sdecade <- scale(dat_BP$Decade)
 
 #Fit generalised mixed model with binomial error family and with logit link function, award as a random effect (using glmer from lme4 package). Note that due to limited time coverage it was not possible to include Decade variable:
-#mod <- glmer(cbind(female, male) ~ sdecade + (1| Award), family = "binomial", data = dat) # does not run:boundary (singular) fit: see help('isSingular')  Probably due  to having too few decades.
-mod_BP <- glmer(cbind(female, male) ~ (1| Award), family = "binomial", data = dat_BP) 
+mod_BP <- glmer(cbind(female, male) ~ 1 + (1 | Award), family = "binomial", data = dat_BP) #across all decades
 summary(mod_BP)
+#calculate % female names at the intercept
+plogis(summary(mod_BP)$coef[1,1])*100 # 45% female names
+#summary(mod_BP)$coef[1,1] #estimate of the Intercept 
+#summary(mod_BP)$coef[1,2] #SE of estimate of the Intercept 
+summary(mod_BP)$coef[1,1] - 1.96 * summary(mod_BP)$coef[1,2] #CI.l
+summary(mod_BP)$coef[1,1] + 1.96 * summary(mod_BP)$coef[1,2] #CI.u
+dim(dat_BP)[1] #sample size
 
-#calculate % difference between genders at the intercept:
-plogis(summary(mod_BP)$coef[1])*100 # 44% fewer female names
+## Model with decade effect:
+#mod_BP <- glmer(cbind(female, male) ~ sdecade + (1 | Award), family = "binomial", data = dat_BP) #does not run - too few points across decades
 ```
 
 
@@ -703,23 +727,22 @@ Alternative statistical analyses of the gender difference in BR awardee names ac
 ```{r BR gender stats years}
 #str(GEOdata)
 GEOdata %>% filter(Award_category == "BR") %>% filter(gender != "X") %>% mutate(Gender = case_when(
-    endsWith(gender, "F") ~ 0,
-    endsWith(gender, "M") ~ 1
+    endsWith(gender, "F") ~ 1,
+    endsWith(gender, "M") ~ 0
     )) -> GEOdata_BR
 #str(GEOdata_BR)
 table(GEOdata_BR$gender)
+table(GEOdata_BR$Gender)
 
 #Scale the award_year variable to have the mean of 0 and SD of 1
 GEOdata_BR$Award_year_scaled <- scale(GEOdata_BR$award_year)
 
 #Fit generalised mixed model with binomial error family and with logit link function, award as a random effect (using glmer from lme4 package):
 model_BR <- glmer(Gender ~ Award_year_scaled + (1|Award_name), family = "binomial", data = GEOdata_BR) #with year as a predictor
-#model_BR <- glmer(Gender ~ (1|Award_name), family = "binomial", data = GEOdata_BR) #without year as a predictor - not working
-
 summary(model_BR)
 
 #calculate % difference between genders at the intercept:
-plogis(summary(model_BR)$coef[1])*100 # 72% fewer female names - similar pattern to the analyses across decades
+plogis(summary(model_BR)$coef[1,1])*100 # 28% female names - similar pattern to the analyses across decades
 ```
 
 Alternative statistical analysis of the gender difference in BP awardee names across years - using individual-level data
@@ -727,23 +750,23 @@ Alternative statistical analysis of the gender difference in BP awardee names ac
 ```{r BP gender stats years}
 #str(GEOdata)
 GEOdata %>% filter(Award_category == "BP") %>% filter(gender != "X") %>% mutate(Gender = case_when(
-    endsWith(gender, "F") ~ 0,
-    endsWith(gender, "M") ~ 1
+    endsWith(gender, "F") ~ 1,
+    endsWith(gender, "M") ~ 0
     )) -> GEOdata_BP
 #str(GEOdata_BP)
 table(GEOdata_BP$gender)
+table(GEOdata_BP$Gender)
 
 #Scale the award_year variable to have the mean of 0 and SD of 1
 GEOdata_BP$Award_year_scaled <- scale(GEOdata_BP$award_year)
 
 #Fit generalised mixed model with binomial error family and with logit link function, award as a random effect (using glmer from lme4 package):
 #model_BP <- glmer(Gender ~ Award_year_scaled + (1|Award_name), family = "binomial", data = GEOdata_BP) #with year as a predictor - not working
-model_BP <- glmer(Gender ~ (1|Award_name), family = "binomial", data = GEOdata_BP) #without year as a predictor
-
+model_BP <- glmer(Gender ~ 1 + (1|Award_name), family = "binomial", data = GEOdata_BP) #without year as a predictor
 summary(model_BP)
 
 #calculate % difference between genders at the intercept:
-plogis(summary(model_BP)$coef[1])*100 # 58% fewer female names- similar pattern to the analyses across decades
+plogis(summary(model_BP)$coef[1,1])*100 # 43% female names- similar pattern to the analyses across decades
 ```
 
 
@@ -766,6 +789,7 @@ GEOdata %>%
   
 GEOdata %>% 
   filter(Award_category == "BR") %>% 
+  #filter(award_year > 2010) %>% 
   filter(!is.na(Country)) %>% 
   #count(Country)
   count(Award_name, Country) %>% 
@@ -776,7 +800,8 @@ GEOdata %>%
   theme_classic() + 
   xlab("Count")
 
-ggsave(here("plots", "BR_awards_country_v1.png"), width = 18, height = 8, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BR_awards_country_v1.png"), width = 18, height = 8, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BR_awards_country_v1.pdf"), width = 18, height = 8, units = "cm")
 
 
 ## for BP awards
@@ -787,6 +812,7 @@ GEOdata %>%
 
 GEOdata %>% 
   filter(Award_category == "BP") %>% 
+  #filter(award_year > 2010) %>% 
   filter(!is.na(Country)) %>% 
   #count(Country)
   count(Award_name, Country) %>% 
@@ -797,7 +823,8 @@ GEOdata %>%
   theme_classic() + 
   xlab("Count")
 
-ggsave(here("plots", "BP_awards_country_v1.png"), width = 18, height = 8, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BP_awards_country_v1.png"), width = 18, height = 8, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BP_awards_country_v1.pdf"), width = 18, height = 8, units = "cm")
 ```
 
 
@@ -826,7 +853,8 @@ GEOdata %>%
   ylab("Count") +
   xlab("Top 10 first names of the BR awardees") 
 
-ggsave(here("plots", "BR_awards_first_names_v0.png"), width = 18, height = 8, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BR_awards_first_names_v0.png"), width = 18, height = 8, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BR_awards_first_names_v0.pdf"), width = 18, height = 8, units = "cm")
 
 
 ## most frequent first names of the past awardees for BP:
@@ -841,7 +869,8 @@ GEOdata %>%
   ylab("Count") +
   xlab("Top 10 first names of the BP awardees") 
 
-ggsave(here("plots", "BP_awards_first_names_v0.png"), width = 18, height = 8, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BP_awards_first_names_v0.png"), width = 18, height = 8, units = "cm", dpi = "retina")
+#ggsave(here("plots", "BP_awards_first_names_v0.pdf"), width = 18, height = 8, units = "cm")
 
 ```
 
